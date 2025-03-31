@@ -1,10 +1,30 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+type AuthUser = {
+  identityProvider: string
+  userDetails: string
+  userId: string
+  userRoles: string[]
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState<AuthUser | null>(null)
+
+  useEffect(() => {
+    fetch('/.auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.length > 0) {
+          setUser(data[0])
+        } else {
+          setUser(null)
+        }
+      })
+      .catch(() => setUser(null))
+  }, [])
 
   return (
     <>
@@ -16,18 +36,20 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+
+      <h1>📚 Read Tracker App</h1>
+
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        {user ? (
+          <>
+            <p>👋 Welcome, {user.userDetails}</p>
+            <p>🔑 Provider: {user.identityProvider}</p>
+            <a href="/.auth/logout">🚪 Logout</a>
+          </>
+        ) : (
+          <a href="/.auth/login/github">🔐 Login with GitHub</a>
+        )}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
