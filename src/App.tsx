@@ -1,34 +1,34 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 type AuthUser = {
-  identityProvider: string
-  userDetails: string
-  userId: string
-  userRoles: string[]
-}
+  identityProvider: string;
+  userId: string;
+  userDetails: string;
+  userRoles: string[];
+};
 
 function App() {
-  const [user, setUser] = useState<AuthUser | null>(null)
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    fetch('/.auth/me')
-      .then((res) => {
-        console.log('Guambo auth', res)
-        return res.json();
-      })
+    fetch("/.auth/me")
+      .then((res) => res.json())
       .then((data) => {
-        console.log("Guambo data:", data);
-        if (data && data.length > 0) {
-          setUser(data[0])
+        console.log("AUTH USER DATA:", data);
+        if (data && data.clientPrincipal) {
+          setUser(data.clientPrincipal);
         } else {
-          setUser(null)
+          setUser(null);
         }
       })
-      .catch(() => setUser(null))
-  }, [])
+      .catch((err) => {
+        console.error("Auth fetch error:", err);
+        setUser(null);
+      });
+  }, []);
 
   return (
     <>
@@ -46,12 +46,13 @@ function App() {
       <div className="card">
         {user ? (
           <>
-            <p>👋 Welcome, {user.userDetails}</p>
+            <p>👋 Welcome, <strong>{user.userDetails}</strong></p>
             <p>🔑 Provider: {user.identityProvider}</p>
+            <p>🧾 Roles: {user.userRoles.join(", ")}</p>
             <a href="/.auth/logout">🚪 Logout</a>
           </>
         ) : (
-          <a href="/.auth/login/github">🔐 Login with GitHub</a>
+          <a href="/.auth/login/github?post_login_redirect_uri=/">🔐 Login with GitHub</a>
         )}
       </div>
     </>
