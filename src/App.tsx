@@ -20,6 +20,7 @@ function App() {
         return res.json();
       })
       .then((data) => {
+        console.log("Guambo data:", data);
         if (data && data.length > 0) {
           setUser(data[0])
         } else {
